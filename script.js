@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPassword = "";
     let isPasswordCorrect = false;
     let scrollTriggers = [];
-    let isInitialRefreshDone = false; // Flag to prevent multiple onload refreshes
+    let isInitialRefreshDone = false;
 
     // --- Text Splitting Utilities (Run Once) ---
     function splitText() {
@@ -243,7 +243,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.body.dataset.textSplit !== 'true') { console.warn("Attempting to set initial states before text splitting."); return; }
         if (scene1) { gsap.set(scene1.querySelectorAll('.scene1-greeting .word, .scene1-text .word'), { opacity: 0, y: 20 }); gsap.set(streetlightBulb, { opacity: 0 }); gsap.set(lightBeam, { opacity: 0, scaleY: 0, transformOrigin: '50% 0%' }); gsap.set(lightBeamDust, { opacity: 0 }); }
         if (scene2) { gsap.set(scene2.querySelectorAll('.scene2-text-block .word'), { opacity: 0, y: 10 }); gsap.set(scene2.querySelectorAll('.gallery-title .char'), { opacity: 0, scale: 1.4, filter: 'blur(2px)', y: 20 }); gsap.set(galleryItems, { opacity: 1 }); gsap.set(galleryImages, { scale: 1, xPercent: 0, yPercent: 0 }); gsap.set(galleryTrack, { x: 0 }); }
-        if (scene4) { gsap.set(scene4.querySelectorAll('.intro-paragraph .word, .outro-paragraph .word'), { opacity: 0, y: 10 }); gsap.set(scene4.querySelector('.strong-emphasis'), { scale: 0.9, filter: 'brightness(0.8)' }); gsap.set(scene4.querySelectorAll('.project-section-title .word'), { opacity: 0, y: 25, rotationX: -20 }); gsap.set(projectCards, { opacity: 0, y: 50, scale: 0.97 }); gsap.set(scene4.querySelectorAll('.project-card .project-title .char'), { opacity: 0, scale: 1.2, y: 5 }); gsap.set(scene4.querySelectorAll('.project-card .project-description .word'), { opacity: 0, y: 8 }); }
+        // Scene 4 Initial States (simplified slightly for performance checks)
+        if (scene4) {
+            gsap.set(scene4.querySelectorAll('.intro-paragraph, .outro-paragraph'), { opacity: 0, y: 20 }); // Animate whole paragraphs
+            gsap.set(scene4.querySelector('.strong-emphasis'), { scale: 1, filter: 'brightness(1)' }); // Start normal
+            gsap.set(scene4.querySelectorAll('.project-section-title'), { opacity: 0, y: 20 }); // Animate whole title
+            gsap.set(projectCards, { opacity: 0, y: 50, scale: 1 }); // Start slightly scaled down, but closer to final scale
+            gsap.set(scene4.querySelectorAll('.project-card .project-title, .project-card .project-description'), { opacity: 1 }); // Start card text visible
+        }
         if (scene5) { gsap.set(scene5.querySelectorAll('.closing-text .word, .signature-lead .word'), { opacity: 0, yPercent: 15 }); gsap.set(scene5.querySelectorAll('.signature .char'), { opacity: 0, scale: 1.5, filter: 'blur(3px)', yPercent: 20, rotationX: -30 }); }
         if (mainContent) { gsap.set(mainContent, { visibility: 'hidden', opacity: 0 }); }
     }
@@ -259,8 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
          requestAnimationFrame(() => {
              setupScrollTriggerAnimations();
              setupHoverMicroAnimations();
-             // Increased delay for refresh to allow layout stabilization
-             gsap.delayedCall(0.3, () => { // <-- INCREASED DELAY HERE
+             gsap.delayedCall(0.3, () => {
                 console.log("Refreshing ScrollTrigger (Delayed Call)...");
                 ScrollTrigger.refresh(true);
                 isInitialRefreshDone = true;
@@ -275,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const clearWillChange = (elements) => gsap.set(elements, { willChange: 'auto' });
 
         // --- Scene 1: Streetlight & Intro ---
+        // (No changes needed here for Scene 4 performance)
         if (scene1 && streetlight && streetlightBulb && lightBeam) {
             const greetingWords = scene1.querySelectorAll('.scene1-greeting .word'); const textWords = scene1.querySelectorAll('.scene1-text .word');
             const st1 = ScrollTrigger.create({ trigger: scene1, start: "top 70%", end: "bottom center", scrub: SCRUB_SMOOTHING, invalidateOnRefresh: true,
@@ -284,125 +291,149 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // --- Scene 2: Gallery (Horizontal Scroll Logic) ---
+        // (No changes needed here for Scene 4 performance)
         if (scene2Wrapper && galleryTrack && shapeGallery && galleryItems.length > 0) {
             const textBlock = scene2.querySelector('.scene2-text-block'); const galleryTitle = scene2.querySelector('.gallery-title');
-
-            if (textBlock) {
-                const st2Text = ScrollTrigger.create({ trigger: textBlock, start: "top 85%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
-                    onEnter: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 1, y: 0, stagger: 0.02, duration: 0.8, ease: "power2.out", overwrite: 'auto' }); gsap.to(self.trigger.querySelectorAll('.emphasis'), { color: "#ffc8dd", scale: 1.03, duration: 0.6, delay: 0.3, ease: "back.out(1)"}); },
-                    onLeaveBack: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 0, y: 10, duration: 0.4, ease: "power1.in", overwrite: 'auto'}); gsap.to(self.trigger.querySelectorAll('.emphasis'), { color: "#bde0fe", scale: 1, duration: 0.4, ease: "power1.in"}); }
-                }); scrollTriggers.push(st2Text);
+            if (textBlock) { /* ... text block animation ... */
+                 const st2Text = ScrollTrigger.create({ trigger: textBlock, start: "top 85%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
+                     onEnter: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 1, y: 0, stagger: 0.02, duration: 0.8, ease: "power2.out", overwrite: 'auto' }); gsap.to(self.trigger.querySelectorAll('.emphasis'), { color: "#ffc8dd", scale: 1.03, duration: 0.6, delay: 0.3, ease: "back.out(1)"}); },
+                     onLeaveBack: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 0, y: 10, duration: 0.4, ease: "power1.in", overwrite: 'auto'}); gsap.to(self.trigger.querySelectorAll('.emphasis'), { color: "#bde0fe", scale: 1, duration: 0.4, ease: "power1.in"}); }
+                 }); scrollTriggers.push(st2Text);
             }
-            if (galleryTitle) {
-                const st2Title = ScrollTrigger.create({ trigger: galleryTitle, start: "top 90%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
-                    onEnter: (self) => { const chars = self.trigger.querySelectorAll('.char'); gsap.to(chars, { opacity: 1, scale: 1, filter: 'blur(0px)', y: 0, stagger: 0.03, duration: 0.6, ease: 'power2.out', overwrite: 'auto' }); },
-                    onLeaveBack: (self) => { const chars = self.trigger.querySelectorAll('.char'); gsap.to(chars, { opacity: 0, scale: 1.4, filter: 'blur(2px)', y: 20, duration: 0.4, ease: 'power1.in', overwrite: 'auto' }); }
-                }); scrollTriggers.push(st2Title);
+            if (galleryTitle) { /* ... gallery title animation ... */
+                 const st2Title = ScrollTrigger.create({ trigger: galleryTitle, start: "top 90%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
+                     onEnter: (self) => { const chars = self.trigger.querySelectorAll('.char'); gsap.to(chars, { opacity: 1, scale: 1, filter: 'blur(0px)', y: 0, stagger: 0.03, duration: 0.6, ease: 'power2.out', overwrite: 'auto' }); },
+                     onLeaveBack: (self) => { const chars = self.trigger.querySelectorAll('.char'); gsap.to(chars, { opacity: 0, scale: 1.4, filter: 'blur(2px)', y: 20, duration: 0.4, ease: 'power1.in', overwrite: 'auto' }); }
+                 }); scrollTriggers.push(st2Title);
             }
-
-            // ** Horizontal Scroll Animation - ADDED LOGGING **
-            let scrollWidth = galleryTrack.scrollWidth;
-            let wrapperWidth = scene2Wrapper.offsetWidth;
-            let galleryStyle = window.getComputedStyle(shapeGallery);
-
-             console.log("--- Horizontal Scroll Check ---");
-             console.log(`Gallery Items Found: ${galleryItems.length}`);
-             console.log(`Scene2 Wrapper OffsetWidth: ${wrapperWidth}px`);
-             console.log(`Gallery Track ScrollWidth: ${scrollWidth}px`);
-             console.log(`Shape Gallery Computed Display: ${galleryStyle.display}`);
-             console.log(`Shape Gallery Computed flexWrap: ${galleryStyle.flexWrap}`);
-             console.log("-----------------------------");
-
-
-             let horizontalScrollLength = scrollWidth > wrapperWidth ? scrollWidth - wrapperWidth : 0;
-
-             if (horizontalScrollLength > 5) { // Add a small threshold to avoid tiny scrolls
-                 const horizontalScrub = gsap.to(galleryTrack, {
-                     x: () => -horizontalScrollLength,
-                     ease: "none",
-                     scrollTrigger: {
-                         trigger: scene2Wrapper,
-                         start: "center center",
-                         end: () => `+=${horizontalScrollLength}`,
-                         scrub: HORIZONTAL_SCRUB_SMOOTHING,
-                         pin: true,
-                         pinSpacing: true,
-                         invalidateOnRefresh: true,
-                         onUpdate: self => {
-                             gsap.to(galleryItems, {
-                                  opacity: (i, target) => {
-                                     const itemRect = target.getBoundingClientRect();
-                                     const distFromCenter = Math.abs(itemRect.left + itemRect.width / 2 - window.innerWidth / 2);
-                                     return Math.max(0.3, 1 - (distFromCenter / (window.innerWidth * 0.7)));
-                                  },
-                                  ease: "none"
-                              });
-                         },
+            let scrollWidth = galleryTrack.scrollWidth; let wrapperWidth = scene2Wrapper.offsetWidth;
+            console.log("--- Horizontal Scroll Check ---"); console.log(`Gallery Items Found: ${galleryItems.length}`); console.log(`Scene2 Wrapper OffsetWidth: ${wrapperWidth}px`); console.log(`Gallery Track ScrollWidth: ${scrollWidth}px`); console.log("-----------------------------");
+            let horizontalScrollLength = scrollWidth > wrapperWidth ? scrollWidth - wrapperWidth : 0;
+            if (horizontalScrollLength > 5) { /* ... horizontal scroll setup ... */
+                 const horizontalScrub = gsap.to(galleryTrack, { x: () => -horizontalScrollLength, ease: "none",
+                     scrollTrigger: { trigger: scene2Wrapper, start: "center center", end: () => `+=${horizontalScrollLength}`, scrub: HORIZONTAL_SCRUB_SMOOTHING, pin: true, pinSpacing: true, invalidateOnRefresh: true,
+                         onUpdate: self => { gsap.to(galleryItems, { opacity: (i, target) => { const itemRect = target.getBoundingClientRect(); const distFromCenter = Math.abs(itemRect.left + itemRect.width / 2 - window.innerWidth / 2); return Math.max(0.3, 1 - (distFromCenter / (window.innerWidth * 0.7))); }, ease: "none" }); },
                          onToggle: self => self.isActive ? setWillChange(galleryTrack) : clearWillChange(galleryTrack),
                      }
-                 });
-                 scrollTriggers.push(horizontalScrub.scrollTrigger);
-
-                  galleryItems.forEach((item) => {
-                      const image = item.querySelector('.gallery-image');
-                      if (!image) return;
-                      gsap.to(item, {
-                          yPercent: () => gsap.utils.random(-2, 2), ease: "none",
-                          scrollTrigger: { containerAnimation: horizontalScrub, trigger: item, start: "left right", end: "right left", scrub: 1.8 }
-                      });
-                      gsap.to(image, {
-                          scale: 1.08, xPercent: () => gsap.utils.random(-2, 2), yPercent: () => gsap.utils.random(-2, 2), ease: "none",
-                          scrollTrigger: { containerAnimation: horizontalScrub, trigger: item, start: "left 80%", end: "right 20%", scrub: 1.2 }
-                      });
-                  });
-                  console.log(`Horizontal scroll initialized with length: ${horizontalScrollLength}px`);
-             } else {
-                 console.warn(`Gallery track not wide enough for horizontal scroll (ScrollLength: ${horizontalScrollLength}px). Track: ${scrollWidth}px, Wrapper: ${wrapperWidth}px`);
-                 // Optionally add fallback styles or message if scroll doesn't activate
-                  gsap.set(galleryTrack, {x: 0}); // Ensure it stays at start if no scroll
-             }
-        } else {
-            console.log("Scene 2 elements for horizontal scroll not found or galleryItems empty.");
-        }
+                 }); scrollTriggers.push(horizontalScrub.scrollTrigger);
+                 galleryItems.forEach((item) => {
+                     const image = item.querySelector('.gallery-image'); if (!image) return;
+                     gsap.to(item, { yPercent: () => gsap.utils.random(-2, 2), ease: "none", scrollTrigger: { containerAnimation: horizontalScrub, trigger: item, start: "left right", end: "right left", scrub: 1.8 } });
+                     gsap.to(image, { scale: 1.08, xPercent: () => gsap.utils.random(-2, 2), yPercent: () => gsap.utils.random(-2, 2), ease: "none", scrollTrigger: { containerAnimation: horizontalScrub, trigger: item, start: "left 80%", end: "right 20%", scrub: 1.2 } });
+                 }); console.log(`Horizontal scroll initialized with length: ${horizontalScrollLength}px`);
+            } else { console.warn(`Gallery track not wide enough for horizontal scroll (ScrollLength: ${horizontalScrollLength}px). Track: ${scrollWidth}px, Wrapper: ${wrapperWidth}px`); gsap.set(galleryTrack, {x: 0}); }
+        } else { console.log("Scene 2 elements for horizontal scroll not found or galleryItems empty."); }
 
         // --- Scene 3: Transition ---
+        // (No changes needed here for Scene 4 performance)
         if (scene3 && scene4 && transitionEffect) {
              const st3 = ScrollTrigger.create({ trigger: scene3, start: 'top top', end: 'bottom top', scrub: SCRUB_SMOOTHING, invalidateOnRefresh: true,
                 animation: gsap.timeline().to(scene4, { clipPath: 'circle(150% at 50% 100%)', ease: 'none' }, 0).fromTo(transitionEffect, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'sine.in' }, 0).to(transitionEffect, { opacity: 0, duration: 0.6, ease: 'sine.out' }, 0.4),
             }); scrollTriggers.push(st3);
         }
 
-        // --- Scene 4: Project Cards ---
+        // --- Scene 4: Project Cards - OPTIMIZED ---
         if (scene4 && projectCards.length > 0) {
-            const introParagraphs = scene4.querySelectorAll('.intro-paragraph'); const projectTitle = scene4.querySelector('.project-section-title'); const outroParagraph = scene4.querySelector('.outro-paragraph');
+            const introParagraphs = scene4.querySelectorAll('.intro-paragraph');
+            const projectTitle = scene4.querySelector('.project-section-title');
+            const outroParagraph = scene4.querySelector('.outro-paragraph');
+
+             // Animate intro paragraphs (ONCE)
              introParagraphs.forEach((p) => {
-                const st4Intro = ScrollTrigger.create({ trigger: p, start: "top 85%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
-                     onEnter: (self) => { const words = self.trigger.querySelectorAll('.word'); const strongEmphasis = self.trigger.querySelector('.strong-emphasis'); gsap.to(words, { opacity: 1, y: 0, stagger: 0.02, duration: 0.8, ease: "power2.out", overwrite: 'auto' }); if (strongEmphasis) { gsap.to(strongEmphasis, { scale: 1.05, filter: 'brightness(1.2)', duration: 0.6, delay: 0.4, ease: "back.out(1.5)" } ); } },
-                     onLeaveBack: (self) => { const words = self.trigger.querySelectorAll('.word'); const strongEmphasis = self.trigger.querySelector('.strong-emphasis'); gsap.to(words, { opacity: 0, y: 10, duration: 0.4, ease: "power1.in", overwrite: 'auto'}); if (strongEmphasis) { gsap.to(strongEmphasis, { scale: 0.9, filter: 'brightness(0.8)', duration: 0.4, ease: "power1.in" } ); } }
-                 }); scrollTriggers.push(st4Intro);
+                const st4Intro = ScrollTrigger.create({
+                    trigger: p,
+                    start: "top 85%",
+                    toggleActions: "play none none none", // Play only once on enter
+                    // once: true, // Alternative to toggleActions
+                    invalidateOnRefresh: true,
+                     onEnter: (self) => {
+                        // Animate the whole paragraph
+                        gsap.to(self.trigger, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", overwrite: 'auto' });
+                        // Animate emphasis within the paragraph if needed
+                        const strongEmphasis = self.trigger.querySelector('.strong-emphasis');
+                        if (strongEmphasis) {
+                            gsap.to(strongEmphasis, { scale: 1.05, filter: 'brightness(1.2)', duration: 0.6, delay: 0.4, ease: "back.out(1.5)" });
+                        }
+                    },
+                    // Removed onLeaveBack
+                 });
+                 scrollTriggers.push(st4Intro);
              });
+
+            // Animate project section title (ONCE)
             if (projectTitle) {
-                const st4SecTitle = ScrollTrigger.create({ trigger: projectTitle, start: "top 90%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
-                    onEnter: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 1, y: 0, rotationX: 0, stagger: 0.04, duration: 0.7, ease: 'power2.out', overwrite: 'auto' }); },
-                    onLeaveBack: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 0, y: 25, rotationX: -20, duration: 0.4, ease: 'power1.in', overwrite: 'auto' }); }
-                }); scrollTriggers.push(st4SecTitle);
+                const st4SecTitle = ScrollTrigger.create({
+                    trigger: projectTitle,
+                    start: "top 90%",
+                    toggleActions: "play none none none", // Play only once on enter
+                    // once: true,
+                    invalidateOnRefresh: true,
+                    onEnter: (self) => {
+                        // Animate the whole title container
+                        gsap.to(self.trigger, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', overwrite: 'auto' });
+                        // Optional: Could still animate words/chars here if desired for initial entry
+                        // const words = self.trigger.querySelectorAll('.word');
+                        // gsap.to(words, { opacity: 1, y: 0, rotationX: 0, stagger: 0.04, duration: 0.7, ease: 'power2.out', overwrite: 'auto' });
+                    },
+                    // Removed onLeaveBack
+                });
+                scrollTriggers.push(st4SecTitle);
             }
+
+            // Animate project cards entrance (ONCE)
              projectCards.forEach((card) => {
-                const st4Card = ScrollTrigger.create({ trigger: card, start: "top 88%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
-                     onEnter: (self) => { const titleChars = self.trigger.querySelectorAll('.project-title .char'); const descriptionWords = self.trigger.querySelectorAll('.project-description .word'); gsap.to(self.trigger, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease:'power1.out', overwrite: 'auto' }); gsap.to(titleChars, { opacity: 1, scale: 1, y: 0, stagger: 0.015, duration: 0.5, delay: 0.1, ease: 'power1.out', overwrite: 'auto' }); gsap.to(descriptionWords, { opacity: 1, y: 0, stagger: 0.01, duration: 0.6, delay: 0.2, ease: 'power1.out', overwrite: 'auto' }); },
-                     onLeaveBack: (self) => { const titleChars = self.trigger.querySelectorAll('.project-title .char'); const descriptionWords = self.trigger.querySelectorAll('.project-description .word'); gsap.to(self.trigger, { opacity: 0, y: 30, scale: 0.98, duration: 0.4, ease:'power1.in', overwrite: 'auto' }); gsap.to(titleChars, { opacity: 0, duration: 0.3, ease: 'power1.in', overwrite: 'auto' }); gsap.to(descriptionWords, { opacity: 0, duration: 0.3, ease: 'power1.in', overwrite: 'auto' }); }
-                 }); scrollTriggers.push(st4Card);
+                const st4Card = ScrollTrigger.create({
+                    trigger: card,
+                    start: "top 88%",
+                    toggleActions: "play none none none", // Play only once on enter
+                    // once: true,
+                    invalidateOnRefresh: true,
+                     onEnter: (self) => {
+                        // Animate the card itself
+                        gsap.to(self.trigger, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease:'power1.out', overwrite: 'auto' });
+                        // Optional: Animate internal elements like title/description ONCE on enter
+                        // const titleChars = self.trigger.querySelectorAll('.project-title .char');
+                        // const descriptionWords = self.trigger.querySelectorAll('.project-description .word');
+                        // gsap.to(titleChars, { opacity: 1, scale: 1, y: 0, stagger: 0.015, duration: 0.5, delay: 0.1, ease: 'power1.out', overwrite: 'auto' });
+                        // gsap.to(descriptionWords, { opacity: 1, y: 0, stagger: 0.01, duration: 0.6, delay: 0.2, ease: 'power1.out', overwrite: 'auto' });
+                    },
+                    // Removed onLeaveBack
+                 });
+                 scrollTriggers.push(st4Card);
              });
-            if (disabilitasCard) { const st4Highlight = ScrollTrigger.create({ trigger: disabilitasCard, start: "center 80%", end: "bottom 20%", toggleClass: { targets: disabilitasCard, className: "is-highlighted" }, invalidateOnRefresh: true }); scrollTriggers.push(st4Highlight); }
+
+            // Highlight specific card (no change needed, toggleClass is efficient)
+            if (disabilitasCard) {
+                const st4Highlight = ScrollTrigger.create({
+                    trigger: disabilitasCard,
+                    start: "center 80%",
+                    end: "bottom 20%",
+                    toggleClass: { targets: disabilitasCard, className: "is-highlighted" },
+                    invalidateOnRefresh: true
+                });
+                scrollTriggers.push(st4Highlight);
+            }
+
+            // Animate outro paragraph (ONCE)
              if (outroParagraph) {
-                const st4Outro = ScrollTrigger.create({ trigger: outroParagraph, start: "top 90%", toggleActions: "play none none reverse", invalidateOnRefresh: true,
-                    onEnter: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 1, y: 0, stagger: 0.02, duration: 0.8, ease: "power2.out", overwrite: 'auto' }); },
-                    onLeaveBack: (self) => { const words = self.trigger.querySelectorAll('.word'); gsap.to(words, { opacity: 0, y: 10, duration: 0.4, ease: "power1.in", overwrite: 'auto' }); }
-                }); scrollTriggers.push(st4Outro);
+                const st4Outro = ScrollTrigger.create({
+                    trigger: outroParagraph,
+                    start: "top 90%",
+                    toggleActions: "play none none none", // Play only once on enter
+                    // once: true,
+                    invalidateOnRefresh: true,
+                    onEnter: (self) => {
+                        // Animate the whole paragraph
+                         gsap.to(self.trigger, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", overwrite: 'auto' });
+                    },
+                    // Removed onLeaveBack
+                });
+                scrollTriggers.push(st4Outro);
              }
         }
 
         // --- Scene 5: Closing ---
+        // (No changes needed here for Scene 4 performance)
         if (scene5) {
             const closingWords = scene5.querySelectorAll('.closing-text .word'); const leadWords = scene5.querySelectorAll('.signature-lead .word'); const signatureChars = scene5.querySelectorAll('.signature .char');
             const st5 = ScrollTrigger.create({ trigger: scene5, start: "top 40%", end: "bottom bottom", scrub: SCRUB_SMOOTHING + 0.3, invalidateOnRefresh: true,
@@ -412,22 +443,34 @@ document.addEventListener('DOMContentLoaded', function() {
             if (pageFadeOut) { const st5Fade = ScrollTrigger.create({ trigger: body, start: "bottom bottom-=50px", end: "bottom bottom", scrub: 0.5, animation: gsap.to(pageFadeOut, { opacity: 1, ease: "none" }), invalidateOnRefresh: true }); scrollTriggers.push(st5Fade); }
         }
 
-        console.log("ScrollTrigger setup complete. Awaiting final refresh call.");
+        console.log("ScrollTrigger setup complete (Optimized Scene 4). Awaiting final refresh call.");
 
     } // End setupScrollTriggerAnimations
 
-    // --- Setup Hover Micro-Animations ---
+    // --- Setup Hover Micro-Animations - OPTIMIZED ---
     function setupHoverMicroAnimations() {
         if (isTouchDevice) return;
+
+        // Gallery item hover (no change needed)
         galleryItems.forEach(item => {
             const image = item.querySelector('.gallery-image'); if (!image) return;
             const tl = gsap.timeline({ paused: true, defaults: { duration: 0.3, ease: 'power1.out' } }).to(item, { y: -4, boxShadow: '0 10px 20px rgba(0, 0, 0, 0.1)' }).to(image, { scale: 1.03 }, 0);
             item.addEventListener('mouseenter', () => tl.timeScale(1).play()); item.addEventListener('mouseleave', () => tl.timeScale(1.5).reverse());
         });
+
+        // Project card hover (non-linked) - Simplified
          document.querySelectorAll('.project-card:not(a > .project-card)').forEach(card => {
-             const icon = card.querySelector('.card-icon'); const tl = gsap.timeline({ paused: true, defaults: { duration: 0.3, ease: 'power1.out' } }).to(card, { y: -5, boxShadow: '0 12px 25px rgba(50, 100, 150, 0.15)' }); if (icon) tl.to(icon, { scale: 1.1, rotate: '-5deg' }, 0);
-             card.addEventListener('mouseenter', () => tl.timeScale(1).play()); card.addEventListener('mouseleave', () => tl.timeScale(1.5).reverse());
+             // const icon = card.querySelector('.card-icon'); // Icon animation removed
+             // Simplified timeline: Only animate transform (translateY)
+             const tl = gsap.timeline({ paused: true, defaults: { duration: 0.3, ease: 'power1.out' } })
+                 .to(card, { y: -5 }); // Removed box-shadow and icon animation
+             // if (icon) tl.to(icon, { scale: 1.1, rotate: '-5deg' }, 0); // Icon animation removed
+
+             card.addEventListener('mouseenter', () => tl.timeScale(1).play());
+             card.addEventListener('mouseleave', () => tl.timeScale(1.5).reverse());
          });
+
+        // Draggable word hover (no change needed)
         draggableWords.forEach(word => {
              const addHover = () => {
                  if (word.getAttribute('draggable') === 'true' && word.style.visibility !== 'hidden') {
@@ -445,6 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
              const observer = new MutationObserver(mutations => { mutations.forEach(mutation => { if (mutation.type === 'attributes' && (mutation.attributeName === 'draggable' || mutation.attributeName === 'style')) { removeHover(); addHover(); } }); });
              observer.observe(word, { attributes: true });
         });
+
     } // End setupHoverMicroAnimations
 
     // --- Initialize ---
@@ -452,16 +496,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Fallback Refresh on Load ---
     window.addEventListener('load', () => {
-        // Only run if the initial delayed refresh hasn't happened or might have been too early
-        // And only if not in reduced motion mode
         if (!isInitialRefreshDone && !prefersReducedMotion) {
              console.log("Refreshing ScrollTrigger (Window Load Fallback)...");
-             // Give it a tiny extra moment after load event fires
              gsap.delayedCall(0.1, () => {
                  ScrollTrigger.refresh(true);
              });
         }
     });
-
 
 }); // End DOMContentLoaded
